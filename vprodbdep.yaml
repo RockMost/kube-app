@@ -43,5 +43,8 @@ spec:
       - name: busybox
         image: busybox:latest
         args: ["rm", "-rf", "/var/lib/mysql/lost+found"] 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> refs/remotes/origin/main
