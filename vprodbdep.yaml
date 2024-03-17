@@ -14,37 +14,36 @@ spec:
       labels:
         app: vprodb
     spec:
+      nodeSelector:
+        zone: us-east-1a
       containers:
       - name: vprodb
         image: vprofile/vprofiledb
-          #args:
-          #- "--ignore-db-dir"
-          #- "lost+found"
+        ports:
+        - name: vprodb-port
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: db-pass
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: vpro-db-data
-        ports:
-         - name: vprodb-port
-           containerPort: 3306
-        env: 
-          - name: MYSQL_ROOT_PASSWORD
-            valueFrom:  
-              secretKeyRef:
-                name: app-secret
-                key: db-pass
-      nodeSelector:
-        zone: us-east-1a 
-      volume:
-      -name: vpro-db-data
-      awsElasticBlockStore: 
-              volumeID: vol-02a7aab38b89b0b31
-              fsType: ext4     
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+      volumes:
+      - name: vpro-db-data
+        awsElasticBlockStore:
+          volumeID: vol-02a7aab38b89b0b31
+          fsType: ext4
       initContainers:
       - name: busybox
         image: busybox:latest
-        args: ["rm", "-rf", "/var/lib/mysql/lost+found"] 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> refs/remotes/origin/main
+        args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
