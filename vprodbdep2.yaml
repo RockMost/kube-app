@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vprodb
+  labels:
+    app: vprodb
+spec:
+  selector:
+    matchLabels:
+      app: vprodb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vprodb
+    spec:
+      nodeSelector:
+        zone: us-east-1a
+      containers:
+      - name: vprodb
+        image: vprofile/vprofiledb
+        ports:
+        - name: vprodb-port
+          containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: db-pass
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: vpro-db-data
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.25"
+            memory: "256Mi"
+      volumes:
+      - name: vpro-db-data
+        awsElasticBlockStore:
+          volumeID: vol-02a7aab38b89b0b31
+          fsType: ext4
+      initContainers:
+      - name: busybox
+        image: busybox:latest
+        args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
